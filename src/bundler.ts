@@ -1,8 +1,9 @@
 import { build, type BuildOptions } from 'esbuild';
-import { readFileSync, statSync } from 'fs';
-import { resolve } from 'path';
+import { readFileSync, statSync, existsSync } from 'fs';
+import { resolve, dirname, join } from 'path';
 import type { BackbundleConfig, BundleResult } from './types.js';
 import { NODE_BUILTINS } from './presets.js';
+import { handleBinaryPackages, generateBinaryInstructions } from './binary-handler.js';
 
 /**
  * Main bundler class for Backbundle
@@ -89,8 +90,38 @@ export class Bundler {
     const startTime = Date.now();
     
     try {
+      // Handle binary packages before building
+      const nodeModulesPath = join(process.cwd(), 'node_modules');
+      const outputDir = dirname(this.config.output);
+      
+      let binaryExternal: string[] = [];
+      let copiedFiles: string[] = [];
+      
+      if (existsSync(nodeModulesPath) && this.config.binaryPackages) {
+        const binaryResult = handleBinaryPackages(
+          this.config,
+          nodeModulesPath,
+          outputDir
+        );
+        binaryExternal = binaryResult.external;
+        copiedFiles = binaryResult.copiedFiles;
+      }
+      
+      // Merge binary externals with existing external packages
+      const originalExternal = [...(this.config.external || [])];
+      this.config.external = [...originalExternal, ...binaryExternal];
+      
       const esbuildOptions = this.buildEsbuildOptions();
       const result = await build(esbuildOptions);
+      
+      // Generate binary instructions if files were copied
+      if (copiedFiles.length > 0) {
+        const instructions = generateBinaryInstructions(
+          copiedFiles,
+          this.config.binaryPackages?.strategy
+        );
+        console.log('\n' + instructions);
+      }
       
       const endTime = Date.now();
       const time = endTime - startTime;

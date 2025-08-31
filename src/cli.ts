@@ -38,6 +38,9 @@ program
   .option('--no-tree-shaking', 'Disable tree shaking')
   .option('--define <key=value...>', 'Define global constants')
   .option('--alias <key=value...>', 'Define import aliases')
+  .option('--binary-strategy <strategy>', 'Binary packages handling strategy (copy, external, ignore)', 'external')
+  .option('--binary-packages <packages...>', 'Explicitly specify binary packages')
+  .option('--binary-output <dir>', 'Output directory for binary files')
   .option('--watch', 'Watch for file changes and rebuild')
   .option('--analyze', 'Show bundle analysis')
   .action(async (options) => {
@@ -172,6 +175,23 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
     });
   }
 
+  // Handle binary packages configuration
+  if (options.binaryStrategy || options.binaryPackages || options.binaryOutput) {
+    config.binaryPackages = config.binaryPackages || {};
+    
+    if (options.binaryStrategy) {
+      config.binaryPackages.strategy = options.binaryStrategy;
+    }
+    
+    if (options.binaryPackages) {
+      config.binaryPackages.packages = options.binaryPackages;
+    }
+    
+    if (options.binaryOutput) {
+      config.binaryPackages.outputDir = options.binaryOutput;
+    }
+  }
+
   // Ensure all required fields are set with defaults
   const finalConfig: BackbundleConfig = {
     entry: config.entry!,
@@ -187,7 +207,8 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
     external: config.external || [],
     define: config.define || {},
     alias: config.alias || {},
-    esbuildOptions: config.esbuildOptions || {}
+    esbuildOptions: config.esbuildOptions || {},
+    binaryPackages: config.binaryPackages
   };
 
   return finalConfig;

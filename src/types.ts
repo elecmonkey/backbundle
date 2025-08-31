@@ -48,6 +48,21 @@ export interface BackbundleConfig {
   
   /** Additional esbuild options */
   esbuildOptions?: Partial<BuildOptions>;
+  
+  /** Binary packages handling configuration */
+  binaryPackages?: {
+    /** Strategy for handling binary packages */
+    strategy?: 'copy' | 'external' | 'ignore';
+    
+    /** List of packages to treat as binary */
+    packages?: string[];
+    
+    /** Output directory for copied binaries */
+    outputDir?: string;
+    
+    /** Whether to preserve directory structure */
+    preserveStructure?: boolean;
+  };
 }
 
 /**
