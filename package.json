@@ -8,7 +8,9 @@
     },
     "type": "module",
     "scripts": {
-        "build": "tsc",
+        "build": "tsdown",
+        "build:tsc": "tsc",
+        "build:watch": "tsdown --watch",
         "dev": "tsx src/cli.ts",
         "test": "node --test",
         "lint": "oxlint --type-aware",
@@ -39,6 +41,7 @@
         "@types/node": "^24.3.0",
         "oxlint": "^1.14.0",
         "oxlint-tsgolint": "^0.1.5",
+        "tsdown": "^0.14.2",
         "tsx": "^4.20.5",
         "typescript": "^5.9.2"
     }
