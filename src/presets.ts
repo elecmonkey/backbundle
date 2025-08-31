@@ -20,21 +20,21 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     description: 'NestJS framework with TypeScript support',
     config: {
       platform: 'node',
-      format: 'cjs',
+      format: 'esm',
       target: 'node18',
       external: [
         ...NODE_BUILTINS,
-        '@nestjs/platform-express',
-        '@nestjs/platform-fastify',
-        'class-transformer',
-        'class-validator',
         'reflect-metadata'
       ],
       define: {
         'process.env.NODE_ENV': '"production"'
       },
       keepNames: true,
-      treeShaking: true
+      treeShaking: true,
+      minify: false,
+      binaryPackages: {
+        strategy: 'copy'
+      }
     }
   },
   {
@@ -42,16 +42,17 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     description: 'Express.js framework',
     config: {
       platform: 'node',
-      format: 'cjs',
-      target: 'node16',
-      external: [
-        ...NODE_BUILTINS,
-        'express'
-      ],
+      format: 'esm',
+      target: 'node18',
+      external: NODE_BUILTINS,
       define: {
         'process.env.NODE_ENV': '"production"'
       },
-      treeShaking: true
+      treeShaking: true,
+      minify: false,
+      binaryPackages: {
+        strategy: 'copy'
+      }
     }
   },
   {
@@ -59,18 +60,17 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     description: 'Koa.js framework',
     config: {
       platform: 'node',
-      format: 'cjs',
-      target: 'node16',
-      external: [
-        ...NODE_BUILTINS,
-        'koa',
-        'koa-router',
-        'koa-bodyparser'
-      ],
+      format: 'esm',
+      target: 'node18',
+      external: NODE_BUILTINS,
       define: {
         'process.env.NODE_ENV': '"production"'
       },
-      treeShaking: true
+      treeShaking: true,
+      minify: false,
+      binaryPackages: {
+        strategy: 'copy'
+      }
     }
   },
   {
@@ -78,16 +78,17 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     description: 'Fastify framework',
     config: {
       platform: 'node',
-      format: 'cjs',
+      format: 'esm',
       target: 'node18',
-      external: [
-        ...NODE_BUILTINS,
-        'fastify'
-      ],
+      external: NODE_BUILTINS,
       define: {
         'process.env.NODE_ENV': '"production"'
       },
-      treeShaking: true
+      treeShaking: true,
+      minify: false,
+      binaryPackages: {
+        strategy: 'copy'
+      }
     }
   },
   {
@@ -95,13 +96,17 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     description: 'Generic Node.js application',
     config: {
       platform: 'node',
-      format: 'cjs',
-      target: 'node16',
+      format: 'esm',
+      target: 'node18',
       external: NODE_BUILTINS,
       define: {
         'process.env.NODE_ENV': '"production"'
       },
-      treeShaking: true
+      treeShaking: true,
+      minify: false,
+      binaryPackages: {
+        strategy: 'copy'
+      }
     }
   }
 ];

@@ -124,6 +124,10 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
     if (detectedFramework) {
       preset = detectedFramework;
       console.log(chalk.blue('🔍 Auto-detected framework:'), chalk.cyan(preset));
+    } else {
+      // Default to generic preset when no framework is detected and no configuration is provided
+      preset = 'generic';
+      console.log(chalk.blue('🎯 No framework detected, using default:'), chalk.cyan(preset));
     }
   }
 
