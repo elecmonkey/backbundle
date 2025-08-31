@@ -4,18 +4,26 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { resolve, dirname, basename, extname } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 import { bundle, detectEntryPoint, detectFramework } from './bundler.js';
 import { getPreset, listPresets } from './presets.js';
 import { loadConfig, mergeConfig } from './config.js';
 import type { BackbundleConfig } from './types.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Read version from package.json
+const packageJsonPath = resolve(__dirname, '../package.json');
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
 const program = new Command();
 
 program
   .name('backbundle')
   .description('A specialized bundler for Node.js backend projects')
-  .version('1.0.0');
+  .version(packageJson.version);
 
 /**
  * Main build command
@@ -46,7 +54,7 @@ program
   .action(async (options) => {
     try {
       const config = await buildConfig(options);
-      
+
       if (options.watch) {
         console.log(chalk.blue('🔍 Starting watch mode...'));
         // Watch mode would be implemented here
@@ -69,7 +77,7 @@ program
   .description('List available framework presets')
   .action(() => {
     console.log(chalk.blue('\n📦 Available Framework Presets:\n'));
-    
+
     const presets = listPresets();
     presets.forEach(preset => {
       console.log(chalk.green(`  ${preset.name}`));
@@ -84,10 +92,10 @@ program
 async function buildConfig(options: any): Promise<BackbundleConfig> {
   // Load configuration file first
   const fileConfig = await loadConfig(options.config);
-  
+
   // Build CLI-based config
   const cliConfig: Partial<BackbundleConfig> = {};
-  
+
   // Only set CLI values if they were explicitly provided
   if (options.input) cliConfig.entry = resolve(options.input);
   if (options.output) cliConfig.output = resolve(options.output);
@@ -182,15 +190,15 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
   // Handle binary packages configuration
   if (options.binaryStrategy || options.binaryPackages || options.binaryOutput) {
     config.binaryPackages = config.binaryPackages || {};
-    
+
     if (options.binaryStrategy) {
       config.binaryPackages.strategy = options.binaryStrategy;
     }
-    
+
     if (options.binaryPackages) {
       config.binaryPackages.packages = options.binaryPackages;
     }
-    
+
     if (options.binaryOutput) {
       config.binaryPackages.outputDir = options.binaryOutput;
     }
@@ -226,16 +234,16 @@ async function runBuild(config: BackbundleConfig, analyze = false): Promise<void
 
   try {
     const result = await bundle(config);
-    
+
     if (result.success) {
       spinner.succeed(chalk.green('✅ Bundle created successfully!'));
-      
+
       console.log(chalk.blue('\n📊 Build Summary:'));
       console.log(chalk.gray(`   Entry:  ${config.entry}`));
       console.log(chalk.gray(`   Output: ${result.outputPath}`));
       console.log(chalk.gray(`   Size:   ${formatBytes(result.size)}`));
       console.log(chalk.gray(`   Time:   ${result.time}ms`));
-      
+
       if (result.warnings && result.warnings.length > 0) {
         console.log(chalk.yellow('\n⚠️  Warnings:'));
         result.warnings.forEach(warning => {
@@ -249,14 +257,14 @@ async function runBuild(config: BackbundleConfig, analyze = false): Promise<void
       }
     } else {
       spinner.fail(chalk.red('❌ Build failed!'));
-      
+
       if (result.errors && result.errors.length > 0) {
         console.log(chalk.red('\n🚨 Errors:'));
         result.errors.forEach(error => {
           console.log(chalk.red(`   ${error}`));
         });
       }
-      
+
       process.exit(1);
     }
   } catch (error) {
@@ -270,11 +278,11 @@ async function runBuild(config: BackbundleConfig, analyze = false): Promise<void
  */
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
-  
+
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
