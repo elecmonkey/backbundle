@@ -9,12 +9,13 @@
     "type": "module",
     "scripts": {
         "build": "tsdown",
-        "build:tsc": "tsc",
+        "build:tsc": "tsgo",
         "build:watch": "tsdown --watch",
         "dev": "tsx src/cli.ts",
         "test": "node --test",
         "lint": "oxlint --type-aware",
         "lint:fix": "oxlint --type-aware --fix",
+        "type-check": "tsgo --noEmit",
         "prepublishOnly": "pnpm run build"
     },
     "keywords": [
@@ -39,10 +40,10 @@
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "@types/node": "^24.3.0",
+        "@typescript/native-preview": "7.0.0-dev.20250831.1",
         "oxlint": "^1.14.0",
         "oxlint-tsgolint": "^0.1.5",
         "tsdown": "^0.14.2",
-        "tsx": "^4.20.5",
-        "typescript": "^5.9.2"
+        "tsx": "^4.20.5"
     }
 }
