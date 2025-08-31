@@ -1,7 +1,7 @@
 {
     "name": "backbundle",
-    "version": "1.0.0",
-    "description": "A specialized bundler for Node.js backend projects (NestJS, Koa, Express) using esbuild",
+    "version": "0.1.0",
+    "description": "Zero-configuration bundler for Node.js backend applications based on esbuild.",
     "main": "dist/index.js",
     "bin": {
         "backbundle": "./dist/cli.js"
@@ -24,8 +24,24 @@
         "nestjs",
         "express",
         "koa",
+        "fastify",
         "esbuild",
-        "backend"
+        "backend",
+        "zero-config",
+        "typescript"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/elecmonkey/backbundle.git"
+    },
+    "bugs": {
+        "url": "https://github.com/elecmonkey/backbundle/issues"
+    },
+    "homepage": "https://github.com/elecmonkey/backbundle#readme",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
     ],
     "author": "elecmonkey",
     "license": "MIT",
