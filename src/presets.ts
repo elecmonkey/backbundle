@@ -31,7 +31,7 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
       },
       keepNames: true,
       treeShaking: true,
-      minify: false,
+      minify: true,
       binaryPackages: {
         strategy: 'copy'
       }
@@ -49,7 +49,7 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
         'process.env.NODE_ENV': '"production"'
       },
       treeShaking: true,
-      minify: false,
+      minify: true,
       binaryPackages: {
         strategy: 'copy'
       }
@@ -67,7 +67,7 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
         'process.env.NODE_ENV': '"production"'
       },
       treeShaking: true,
-      minify: false,
+      minify: true,
       binaryPackages: {
         strategy: 'copy'
       }
@@ -85,7 +85,7 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
         'process.env.NODE_ENV': '"production"'
       },
       treeShaking: true,
-      minify: false,
+      minify: true,
       binaryPackages: {
         strategy: 'copy'
       }
@@ -103,7 +103,7 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
         'process.env.NODE_ENV': '"production"'
       },
       treeShaking: true,
-      minify: false,
+      minify: true,
       binaryPackages: {
         strategy: 'copy'
       }
