@@ -10,6 +10,9 @@ export interface BackbundleConfig {
   /** Output file path */
   output: string;
   
+  /** Framework preset to use */
+  preset?: string;
+  
   /** Target platform, defaults to 'node' */
   platform?: 'node' | 'browser' | 'neutral';
   

@@ -7,6 +7,7 @@ import { resolve, dirname, basename, extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { bundle, detectEntryPoint, detectFramework } from './bundler.js';
 import { getPreset, listPresets } from './presets.js';
+import { loadConfig, mergeConfig } from './config.js';
 import type { BackbundleConfig } from './types.js';
 
 const program = new Command();
@@ -22,6 +23,7 @@ program
 program
   .command('build')
   .description('Bundle a Node.js backend application')
+  .option('-c, --config <file>', 'Path to configuration file')
   .option('-i, --input <file>', 'Entry point file')
   .option('-o, --output <file>', 'Output file path')
   .option('-p, --preset <name>', 'Use a framework preset (nestjs, express, koa, fastify, generic)')
@@ -74,23 +76,46 @@ program
   });
 
 /**
- * Build configuration from CLI options
+ * Build configuration from CLI options and config file
  */
 async function buildConfig(options: any): Promise<BackbundleConfig> {
-  let entry = options.input;
-  let output = options.output;
+  // Load configuration file first
+  const fileConfig = await loadConfig(options.config);
+  
+  // Build CLI-based config
+  const cliConfig: Partial<BackbundleConfig> = {};
+  
+  // Only set CLI values if they were explicitly provided
+  if (options.input) cliConfig.entry = resolve(options.input);
+  if (options.output) cliConfig.output = resolve(options.output);
+  if (options.platform !== 'node') cliConfig.platform = options.platform; // Only if not default
+  if (options.format !== 'cjs') cliConfig.format = options.format; // Only if not default
+  if (options.target !== 'node18') cliConfig.target = options.target; // Only if not default
+  if (options.minify === false) cliConfig.minify = false; // Only if explicitly disabled
+  if (options.sourcemap) cliConfig.sourcemap = options.sourcemap;
+  if (options.keepNames) cliConfig.keepNames = true;
+  if (options.treeShaking === false) cliConfig.treeShaking = false; // Only if explicitly disabled
+  if (options.excludePackages) cliConfig.excludePackages = true;
+  if (options.preset) cliConfig.preset = options.preset;
+  if (options.external) cliConfig.external = options.external;
 
-  // Auto-detect entry point if not provided
+  // Merge file config with CLI config (CLI takes precedence)
+  let config = mergeConfig(fileConfig, cliConfig);
+
+  // Handle entry point detection
+  let entry = config.entry;
   if (!entry) {
-    entry = detectEntryPoint();
-    if (!entry) {
-      throw new Error('Could not detect entry point. Please specify with --input option.');
+    const detectedEntry = detectEntryPoint();
+    if (!detectedEntry) {
+      throw new Error('Could not detect entry point. Please specify with --input option or in config file.');
     }
+    entry = detectedEntry;
     console.log(chalk.blue('🔍 Auto-detected entry point:'), chalk.cyan(entry));
+    config.entry = entry;
   }
 
-  // Auto-detect framework if preset not specified
-  let preset = options.preset;
+  // Handle framework/preset detection
+  let preset = config.preset || options.preset;
   if (!preset) {
     const detectedFramework = detectFramework();
     if (detectedFramework) {
@@ -100,35 +125,24 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
   }
 
   // Generate output filename if not provided
+  let output = config.output;
   if (!output) {
-    const inputBasename = basename(entry, extname(entry));
+    const inputBasename = basename(config.entry!, extname(config.entry!));
     output = resolve(process.cwd(), 'dist', `${inputBasename}.js`);
+    config.output = output;
   }
 
   // Ensure output directory exists
-  const outputDir = dirname(output);
+  const outputDir = dirname(config.output!);
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
   }
 
-  // Start with base config
-  let config: BackbundleConfig = {
-    entry: resolve(entry),
-    output: resolve(output),
-    platform: options.platform,
-    format: options.format,
-    target: options.target,
-    minify: options.minify !== false,
-    sourcemap: options.sourcemap || false,
-    keepNames: options.keepNames || false,
-    treeShaking: options.treeShaking !== false,
-    excludePackages: options.excludePackages || false,
-  };
-
-  // Apply preset if specified
+  // Apply preset configuration
   if (preset) {
     const presetConfig = getPreset(preset);
     if (presetConfig) {
+      // Merge preset with existing config, but don't override user settings
       config = { ...presetConfig.config, ...config };
       console.log(chalk.blue('🎯 Using preset:'), chalk.cyan(preset));
     } else {
@@ -136,12 +150,7 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
     }
   }
 
-  // Handle external modules
-  if (options.external) {
-    config.external = [...(config.external || []), ...options.external];
-  }
-
-  // Handle defines
+  // Handle CLI defines
   if (options.define) {
     config.define = config.define || {};
     options.define.forEach((def: string) => {
@@ -152,7 +161,7 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
     });
   }
 
-  // Handle aliases
+  // Handle CLI aliases
   if (options.alias) {
     config.alias = config.alias || {};
     options.alias.forEach((alias: string) => {
@@ -163,7 +172,25 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
     });
   }
 
-  return config;
+  // Ensure all required fields are set with defaults
+  const finalConfig: BackbundleConfig = {
+    entry: config.entry!,
+    output: config.output!,
+    platform: config.platform || 'node',
+    format: config.format || 'cjs',
+    target: config.target || 'node18',
+    minify: config.minify !== false,
+    sourcemap: config.sourcemap || false,
+    keepNames: config.keepNames || false,
+    treeShaking: config.treeShaking !== false,
+    excludePackages: config.excludePackages || false,
+    external: config.external || [],
+    define: config.define || {},
+    alias: config.alias || {},
+    esbuildOptions: config.esbuildOptions || {}
+  };
+
+  return finalConfig;
 }
 
 /**
