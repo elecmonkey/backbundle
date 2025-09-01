@@ -5,7 +5,7 @@ import type { BackbundleConfig, BundleResult } from './types.js';
 import { NODE_BUILTINS } from './presets.js';
 import { handleBinaryPackages, generateBinaryInstructions } from './binary-handler.js';
 import { AssetHandler } from './asset-handler.js';
-import { getPlugins } from './plugins.js';
+import { getAllPlugins } from './plugins.js';
 
 /**
  * Main bundler class for Backbundle
@@ -51,7 +51,7 @@ export class Bundler {
     }
 
     // Get all plugins (including custom ones)
-    const allPlugins = getPlugins(config);
+    const allPlugins = getAllPlugins(config);
 
     const esbuildOptions: BuildOptions = {
       entryPoints: [config.entry],
