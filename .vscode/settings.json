@@ -1,0 +1,40 @@
+{
+  "typescript.preferences.noSemicolons": "off",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxlint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "oxlint.enable": true,
+  "oxlint.typeAware": true,
+  "oxlint.configPath": ".oxlintrc.json",
+  "oxlint.autoFixOnSave": true,
+  "oxlint.trace.server": "verbose",
+  "files.associations": {
+    ".oxlintrc": "json",
+    ".oxlintrc.json": "json"
+  },
+  "json.schemas": [
+    {
+      "fileMatch": [
+        ".oxlintrc.json"
+      ],
+      "url": "https://raw.githubusercontent.com/oxc-project/oxc/main/crates/oxc_linter/src/options/schema.json"
+    }
+  ],
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.oxlint": "explicit"
+    }
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.oxlint": "explicit"
+    }
+  },
+  "oxc.enable": false
+}
