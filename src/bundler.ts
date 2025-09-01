@@ -5,6 +5,7 @@ import type { BackbundleConfig, BundleResult } from './types.js';
 import { NODE_BUILTINS } from './presets.js';
 import { handleBinaryPackages, generateBinaryInstructions } from './binary-handler.js';
 import { AssetHandler } from './asset-handler.js';
+import { getPlugins } from './plugins.js';
 
 /**
  * Main bundler class for Backbundle
@@ -49,6 +50,9 @@ export class Bundler {
       // This will be handled by esbuild's packages option
     }
 
+    // Get all plugins (including custom ones)
+    const allPlugins = getPlugins(config);
+
     const esbuildOptions: BuildOptions = {
       entryPoints: [config.entry],
       outfile: config.output,
@@ -63,7 +67,17 @@ export class Bundler {
       treeShaking: config.treeShaking,
       logLevel: 'warning',
       metafile: true,
-      ...config.esbuildOptions,
+      // For ESM format, ensure proper handling of CommonJS packages
+      ...(config.format === 'esm' && {
+        mainFields: ['module', 'main'],
+        banner: {
+          js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`
+        }
+      }),
+      // Apply merged configuration, but exclude plugins to avoid duplication
+      ...{ ...config.esbuildOptions, plugins: undefined },
+      // Add all plugins
+      plugins: allPlugins,
     };
 
     // Handle packages exclusion
