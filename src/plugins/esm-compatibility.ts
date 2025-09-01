@@ -11,10 +11,15 @@ export function createEsmCompatibilityPlugin(): Plugin {
       // Add createRequire banner for ESM format
       const options = build.initialOptions;
       if (options.format === 'esm') {
-        options.banner = {
-          ...options.banner,
-          js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);${options.banner?.js || ''}`
-        };
+        const existingBanner = options.banner?.js || '';
+        // Check if createRequire is already declared to avoid duplicates
+        if (!existingBanner.includes('createRequire')) {
+          const createRequireBanner = `import { createRequire } from 'module';const require = createRequire(import.meta.url);`;
+          options.banner = {
+            ...options.banner,
+            js: createRequireBanner + existingBanner
+          };
+        }
       }
     }
   };

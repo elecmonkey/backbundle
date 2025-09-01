@@ -68,10 +68,7 @@ export class Bundler {
       metafile: true,
       // For ESM format, ensure proper handling of CommonJS packages
       ...(config.format === 'esm' && {
-        mainFields: ['module', 'main'],
-        banner: {
-          js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`
-        }
+        mainFields: ['module', 'main']
       }),
       // Apply merged configuration, but exclude plugins to avoid duplication
       ...config.esbuildOptions,
