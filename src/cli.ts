@@ -49,6 +49,13 @@ program
   .option('--binary-strategy <strategy>', 'Binary packages handling strategy (copy, external, ignore)', 'external')
   .option('--binary-packages <packages...>', 'Explicitly specify binary packages')
   .option('--binary-output <dir>', 'Output directory for binary files')
+  .option('--wasm-strategy <strategy>', 'WASM packages handling strategy (copy, external, ignore)', 'copy')
+  .option('--wasm-packages <packages...>', 'Explicitly specify WASM packages')
+  .option('--wasm-output <dir>', 'Output directory for WASM files')
+  .option('--asset-strategy <strategy>', 'Asset packages handling strategy (copy, external, ignore)', 'copy')
+  .option('--asset-packages <packages...>', 'Explicitly specify asset packages')
+  .option('--asset-output <dir>', 'Output directory for asset files')
+  .option('--asset-extensions <extensions...>', 'File extensions to treat as assets', ['.json', '.txt', '.xml', '.yaml', '.yml'])
   .option('--watch', 'Watch for file changes and rebuild')
   .option('--analyze', 'Show bundle analysis')
   .action(async (options) => {
@@ -204,6 +211,44 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
     }
   }
 
+  // Handle WASM packages configuration
+  if (options.wasmStrategy || options.wasmPackages || options.wasmOutput) {
+    config.wasmPackages = config.wasmPackages || {};
+
+    if (options.wasmStrategy) {
+      config.wasmPackages.strategy = options.wasmStrategy;
+    }
+
+    if (options.wasmPackages) {
+      config.wasmPackages.packages = options.wasmPackages;
+    }
+
+    if (options.wasmOutput) {
+      config.wasmPackages.outputDir = options.wasmOutput;
+    }
+  }
+
+  // Handle asset packages configuration
+  if (options.assetStrategy || options.assetPackages || options.assetOutput || options.assetExtensions) {
+    config.assetPackages = config.assetPackages || {};
+
+    if (options.assetStrategy) {
+      config.assetPackages.strategy = options.assetStrategy;
+    }
+
+    if (options.assetPackages) {
+      config.assetPackages.packages = options.assetPackages;
+    }
+
+    if (options.assetOutput) {
+      config.assetPackages.outputDir = options.assetOutput;
+    }
+
+    if (options.assetExtensions) {
+      config.assetPackages.extensions = options.assetExtensions;
+    }
+  }
+
   // Ensure all required fields are set with defaults
   const finalConfig: BackbundleConfig = {
     entry: config.entry!,
@@ -220,7 +265,9 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
     define: config.define || {},
     alias: config.alias || {},
     esbuildOptions: config.esbuildOptions || {},
-    binaryPackages: config.binaryPackages
+    binaryPackages: config.binaryPackages,
+    wasmPackages: config.wasmPackages,
+    assetPackages: config.assetPackages
   };
 
   return finalConfig;

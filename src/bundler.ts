@@ -4,6 +4,7 @@ import { resolve, dirname, join } from 'path';
 import type { BackbundleConfig, BundleResult } from './types.js';
 import { NODE_BUILTINS } from './presets.js';
 import { handleBinaryPackages, generateBinaryInstructions } from './binary-handler.js';
+import { AssetHandler } from './asset-handler.js';
 
 /**
  * Main bundler class for Backbundle
@@ -88,32 +89,40 @@ export class Bundler {
    */
   async bundle(): Promise<BundleResult> {
     const startTime = Date.now();
-    
+
     try {
-      // Handle binary packages before building
+      // Handle binary packages and assets before building
       const nodeModulesPath = join(process.cwd(), 'node_modules');
       const outputDir = dirname(this.config.output);
-      
+
       let binaryExternal: string[] = [];
+      let assetExternal: string[] = [];
       let copiedFiles: string[] = [];
-      
-      if (existsSync(nodeModulesPath) && this.config.binaryPackages) {
-        const binaryResult = handleBinaryPackages(
-          this.config,
-          nodeModulesPath,
-          outputDir
-        );
-        binaryExternal = binaryResult.external;
-        copiedFiles = binaryResult.copiedFiles;
+
+      if (existsSync(nodeModulesPath)) {
+        // Handle binary packages
+        if (this.config.binaryPackages) {
+          const binaryResult = handleBinaryPackages(
+            this.config,
+            nodeModulesPath,
+            outputDir
+          );
+          binaryExternal = binaryResult.external;
+          copiedFiles.push(...binaryResult.copiedFiles);
+        }
+
+        // Handle WASM and asset packages
+        const assetHandler = new AssetHandler(this.config, outputDir);
+        assetExternal = assetHandler.getAllExternals();
       }
-      
-      // Merge binary externals with existing external packages
+
+      // Merge all externals with existing external packages
       const originalExternal = [...(this.config.external || [])];
-      this.config.external = [...originalExternal, ...binaryExternal];
-      
+      this.config.external = [...originalExternal, ...binaryExternal, ...assetExternal];
+
       const esbuildOptions = this.buildEsbuildOptions();
       const result = await build(esbuildOptions);
-      
+
       // Generate binary instructions if files were copied
       if (copiedFiles.length > 0) {
         const instructions = generateBinaryInstructions(
@@ -122,10 +131,10 @@ export class Bundler {
         );
         console.log('\n' + instructions);
       }
-      
+
       const endTime = Date.now();
       const time = endTime - startTime;
-      
+
       // Get output file size
       let size = 0;
       try {
@@ -189,7 +198,7 @@ export function detectEntryPoint(baseDir: string = process.cwd()): string | null
   const possibleEntries = [
     'src/main.ts',
     'src/main.js',
-    'src/index.ts', 
+    'src/index.ts',
     'src/index.js',
     'src/app.ts',
     'src/app.js',

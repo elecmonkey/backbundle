@@ -34,6 +34,15 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
       minify: true,
       binaryPackages: {
         strategy: 'copy'
+      },
+      wasmPackages: {
+        strategy: 'copy',
+        preserveStructure: true
+      },
+      assetPackages: {
+        strategy: 'copy',
+        extensions: ['.json', '.txt', '.xml', '.yaml', '.yml'],
+        preserveStructure: true
       }
     }
   },
@@ -52,6 +61,15 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
       minify: true,
       binaryPackages: {
         strategy: 'copy'
+      },
+      wasmPackages: {
+        strategy: 'copy',
+        preserveStructure: true
+      },
+      assetPackages: {
+        strategy: 'copy',
+        extensions: ['.json', '.txt', '.xml', '.yaml', '.yml'],
+        preserveStructure: true
       }
     }
   },
@@ -70,6 +88,15 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
       minify: true,
       binaryPackages: {
         strategy: 'copy'
+      },
+      wasmPackages: {
+        strategy: 'copy',
+        preserveStructure: true
+      },
+      assetPackages: {
+        strategy: 'copy',
+        extensions: ['.json', '.txt', '.xml', '.yaml', '.yml'],
+        preserveStructure: true
       }
     }
   },
@@ -88,6 +115,15 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
       minify: true,
       binaryPackages: {
         strategy: 'copy'
+      },
+      wasmPackages: {
+        strategy: 'copy',
+        preserveStructure: true
+      },
+      assetPackages: {
+        strategy: 'copy',
+        extensions: ['.json', '.txt', '.xml', '.yaml', '.yml'],
+        preserveStructure: true
       }
     }
   },
@@ -106,6 +142,15 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
       minify: true,
       binaryPackages: {
         strategy: 'copy'
+      },
+      wasmPackages: {
+        strategy: 'copy',
+        preserveStructure: true
+      },
+      assetPackages: {
+        strategy: 'copy',
+        extensions: ['.json', '.txt', '.xml', '.yaml', '.yml'],
+        preserveStructure: true
       }
     }
   }
