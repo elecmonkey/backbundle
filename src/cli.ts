@@ -11,12 +11,49 @@ import { loadConfig, mergeConfig } from './config.js';
 import { getPreset, listPresets } from './presets.js';
 import type { BackbundleConfig } from './types.js';
 
+interface CLIOptions {
+  config?: string;
+  input?: string;
+  output?: string;
+  preset?: string;
+  format?: 'cjs' | 'esm' | 'iife';
+  target?: string;
+  minify?: boolean;
+  sourcemap?: boolean | 'inline' | 'external' | 'both';
+  external?: string[];
+  excludePackages?: boolean;
+  keepNames?: boolean;
+  treeShaking?: boolean;
+  define?: string[];
+  alias?: string[];
+  binaryStrategy?: 'copy' | 'external' | 'ignore';
+  binaryPackages?: string[];
+  binaryOutput?: string;
+  wasmStrategy?: 'copy' | 'external' | 'ignore' | 'inline';
+  wasmPackages?: string[];
+  wasmOutput?: string;
+  assetStrategy?: 'copy' | 'external' | 'ignore' | 'inline';
+  assetPackages?: string[];
+  assetOutput?: string;
+  assetExtensions?: string[];
+  watch?: boolean;
+  analyze?: boolean;
+}
+
+function isPackageJson(obj: unknown): obj is { version: string } {
+  return typeof obj === 'object' && obj !== null && 'version' in obj && typeof (obj as Record<string, unknown>).version === 'string';
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Read version from package.json
 const packageJsonPath = resolve(__dirname, '../package.json');
-const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+const packageJsonRaw: unknown = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+if (!isPackageJson(packageJsonRaw)) {
+  throw new Error('Invalid package.json format');
+}
+const packageJson = packageJsonRaw;
 
 const program = new Command();
 
@@ -35,7 +72,6 @@ program
   .option('-i, --input <file>', 'Entry point file')
   .option('-o, --output <file>', 'Output file path')
   .option('-p, --preset <name>', 'Use a framework preset (nestjs, express, koa, fastify, generic)')
-  .option('--platform <platform>', 'Target platform (node, browser, neutral)', 'node')
   .option('--format <format>', 'Output format (cjs, esm, iife)', 'cjs')
   .option('--target <target>', 'Target environment (e.g., node18)', 'node18')
   .option('--no-minify', 'Disable code minification')
@@ -58,7 +94,7 @@ program
   .option('--asset-extensions <extensions...>', 'File extensions to treat as assets', ['.json', '.txt', '.xml', '.yaml', '.yml'])
   .option('--watch', 'Watch for file changes and rebuild')
   .option('--analyze', 'Show bundle analysis')
-  .action(async (options) => {
+  .action(async (options: CLIOptions) => {
     try {
       const config = await buildConfig(options);
 
@@ -96,7 +132,7 @@ program
 /**
  * Build configuration from CLI options and config file
  */
-async function buildConfig(options: any): Promise<BackbundleConfig> {
+async function buildConfig(options: CLIOptions): Promise<BackbundleConfig> {
   // Load configuration file first
   const fileConfig = await loadConfig(options.config);
 
@@ -106,7 +142,6 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
   // Only set CLI values if they were explicitly provided
   if (options.input) cliConfig.entry = resolve(options.input);
   if (options.output) cliConfig.output = resolve(options.output);
-  if (options.platform !== 'node') cliConfig.platform = options.platform; // Only if not default
   if (options.format !== 'cjs') cliConfig.format = options.format; // Only if not default
   if (options.target !== 'node18') cliConfig.target = options.target; // Only if not default
   if (options.minify === false) cliConfig.minify = false; // Only if explicitly disabled
@@ -253,7 +288,6 @@ async function buildConfig(options: any): Promise<BackbundleConfig> {
   const finalConfig: BackbundleConfig = {
     entry: config.entry!,
     output: config.output!,
-    platform: config.platform || 'node',
     format: config.format || 'cjs',
     target: config.target || 'node18',
     minify: config.minify !== false,

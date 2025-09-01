@@ -101,6 +101,11 @@ export class AssetHandler {
                     // WASM files typically cannot be inlined effectively, fall back to copy
                     this.copyWasmFiles(packagePath, packageName, wasmConfig.preserveStructure);
                     break;
+                case undefined:
+                default:
+                    // Default to copy if no strategy specified
+                    this.copyWasmFiles(packagePath, packageName, wasmConfig.preserveStructure);
+                    break;
             }
         }
 
@@ -187,6 +192,11 @@ export class AssetHandler {
                     break;
                 case 'inline':
                     // Assets can sometimes be inlined, but for now we copy them
+                    this.copyAssetFiles(packagePath, packageName, extensions, assetConfig.preserveStructure);
+                    break;
+                case undefined:
+                default:
+                    // Default to copy if no strategy specified
                     this.copyAssetFiles(packagePath, packageName, extensions, assetConfig.preserveStructure);
                     break;
             }

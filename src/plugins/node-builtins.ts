@@ -7,7 +7,7 @@ import type { Plugin } from 'esbuild';
 export function createNodeBuiltinsPlugin(): Plugin {
   return {
     name: 'node-builtins',
-    setup(build) {
+    setup(_build) {
       // This plugin can be extended to handle Node.js built-ins polyfills
       // for different target environments
     }

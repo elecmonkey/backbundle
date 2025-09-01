@@ -3,6 +3,10 @@ import { resolve } from 'path';
 import { pathToFileURL } from 'url';
 import type { BackbundleConfig } from './types.js';
 
+function isValidConfig(obj: unknown): obj is Partial<BackbundleConfig> {
+  return typeof obj === 'object' && obj !== null;
+}
+
 /**
  * Possible configuration file names
  */
@@ -47,23 +51,39 @@ export async function loadConfig(configPath?: string, baseDir: string = process.
       // Handle JSON config files
       const { readFileSync } = await import('fs');
       const content = readFileSync(configFile, 'utf-8');
-      return JSON.parse(content);
+      const parsed: unknown = JSON.parse(content);
+      if (isValidConfig(parsed)) {
+        return parsed;
+      }
+      throw new Error('Invalid configuration format');
     } else if (configFile.endsWith('.ts')) {
       // Handle TypeScript config files (requires tsx or ts-node)
       try {
         const { pathToFileURL } = await import('url');
         const tsx = await import('tsx/esm/api');
         tsx.register();
-        const module = await import(pathToFileURL(configFile).href);
-        return module.default || module;
+        const module: unknown = await import(pathToFileURL(configFile).href);
+        const config = typeof module === 'object' && module !== null && 'default' in module 
+          ? (module as { default: unknown }).default 
+          : module;
+        if (isValidConfig(config)) {
+          return config;
+        }
+        throw new Error('Invalid configuration format');
       } catch (error) {
-        throw new Error(`Failed to load TypeScript config file. Make sure tsx is installed: ${error}`);
+        throw new Error(`Failed to load TypeScript config file. Make sure tsx is installed: ${error instanceof Error ? error.message : String(error)}`);
       }
     } else {
       // Handle JavaScript config files (.js, .mjs)
       const fileUrl = pathToFileURL(configFile).href;
-      const module = await import(fileUrl);
-      return module.default || module;
+      const module: unknown = await import(fileUrl);
+      const config = typeof module === 'object' && module !== null && 'default' in module 
+        ? (module as { default: unknown }).default 
+        : module;
+      if (isValidConfig(config)) {
+        return config;
+      }
+      throw new Error('Invalid configuration format');
     }
   } catch (error) {
     throw new Error(`Failed to load configuration from ${configFile}: ${error instanceof Error ? error.message : String(error)}`);

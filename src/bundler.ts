@@ -22,7 +22,6 @@ export class Bundler {
    */
   private normalizeConfig(config: BackbundleConfig): BackbundleConfig {
     return {
-      platform: 'node',
       format: 'cjs',
       minify: true,
       sourcemap: false,
@@ -57,7 +56,7 @@ export class Bundler {
       entryPoints: [config.entry],
       outfile: config.output,
       bundle: true,
-      platform: config.platform,
+      platform: 'node',
       format: config.format,
       minify: config.minify,
       sourcemap: config.sourcemap,
@@ -154,7 +153,7 @@ export class Bundler {
       try {
         const stats = statSync(this.config.output);
         size = stats.size;
-      } catch (error) {
+      } catch {
         // File might not exist if there were errors
       }
 
@@ -243,7 +242,16 @@ export function detectEntryPoint(baseDir: string = process.cwd()): string | null
 export function detectFramework(baseDir: string = process.cwd()): string | null {
   try {
     const packageJsonPath = resolve(baseDir, 'package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    const packageJsonRaw: unknown = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    
+    if (typeof packageJsonRaw !== 'object' || packageJsonRaw === null) {
+      return 'generic';
+    }
+    
+    const packageJson = packageJsonRaw as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
     const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
     if (dependencies['@nestjs/core']) return 'nestjs';

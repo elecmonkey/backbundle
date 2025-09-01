@@ -13,9 +13,6 @@ export interface BackbundleConfig {
   /** Framework preset to use */
   preset?: string;
 
-  /** Target platform, defaults to 'node' */
-  platform?: 'node' | 'browser' | 'neutral';
-
   /** Output format, defaults to 'cjs' */
   format?: 'cjs' | 'esm' | 'iife';
 

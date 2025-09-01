@@ -19,7 +19,6 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     name: 'nestjs',
     description: 'NestJS framework with TypeScript support',
     config: {
-      platform: 'node',
       format: 'esm',
       target: 'node18',
       external: [
@@ -50,7 +49,6 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     name: 'express',
     description: 'Express.js framework',
     config: {
-      platform: 'node',
       format: 'esm',
       target: 'node18',
       external: NODE_BUILTINS,
@@ -77,7 +75,6 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     name: 'koa',
     description: 'Koa.js framework',
     config: {
-      platform: 'node',
       format: 'esm',
       target: 'node18',
       external: NODE_BUILTINS,
@@ -104,7 +101,6 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     name: 'fastify',
     description: 'Fastify framework',
     config: {
-      platform: 'node',
       format: 'esm',
       target: 'node18',
       external: NODE_BUILTINS,
@@ -131,7 +127,6 @@ export const FRAMEWORK_PRESETS: FrameworkPreset[] = [
     name: 'generic',
     description: 'Generic Node.js application',
     config: {
-      platform: 'node',
       format: 'esm',
       target: 'node18',
       external: NODE_BUILTINS,

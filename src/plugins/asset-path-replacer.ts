@@ -10,7 +10,7 @@ export function createAssetPathReplacerPlugin(config: BackbundleConfig): Plugin 
   return {
     name: 'asset-path-replacer',
     setup(build) {
-      const outputDir = dirname(config.output);
+      const _outputDir = dirname(config.output);
 
       build.onLoad({ filter: /\.(ts|js|tsx|jsx)$/ }, async (args) => {
         const fs = await import('fs');
@@ -23,7 +23,7 @@ export function createAssetPathReplacerPlugin(config: BackbundleConfig): Plugin 
           const wasmOutputDir = config.wasmPackages.outputDir || 'assets/wasm';
           const wasmReplaced = transformedContents.replace(
             /(['"`])([^'"`]*\/node_modules\/([^/]+)\/[^'"`]*\.wasm)\1/g,
-            (match, quote, fullPath, packageName) => {
+            (match: string, quote: string, fullPath: string, packageName: string) => {
               const wasmFileName = fullPath.split('/').pop();
               const newPath = `${quote}./${wasmOutputDir}/${packageName}/${wasmFileName}${quote}`;
               console.log(`🔄 Replacing WASM path: ${fullPath} → ./${wasmOutputDir}/${packageName}/${wasmFileName}`);
@@ -39,7 +39,7 @@ export function createAssetPathReplacerPlugin(config: BackbundleConfig): Plugin 
           const binaryOutputDir = config.binaryPackages.outputDir || 'native';
           const binaryReplaced = transformedContents.replace(
             /(['"`])([^'"`]*\/node_modules\/([^/]+)\/[^'"`]*\.node)\1/g,
-            (match, quote, fullPath, packageName) => {
+            (match: string, quote: string, fullPath: string, packageName: string) => {
               const binaryFileName = fullPath.split('/').pop();
               const newPath = `${quote}./${binaryOutputDir}/${packageName}/${binaryFileName}${quote}`;
               console.log(`🔄 Replacing binary path: ${fullPath} → ./${binaryOutputDir}/${packageName}/${binaryFileName}`);
@@ -62,7 +62,7 @@ export function createAssetPathReplacerPlugin(config: BackbundleConfig): Plugin 
 
             const assetReplaced = transformedContents.replace(
               regex,
-              (match, quote, fullPath, packageName) => {
+              (match: string, quote: string, fullPath: string, packageName: string) => {
                 const assetFileName = fullPath.split('/').pop();
                 const newPath = `${quote}./${assetOutputDir}/${packageName}/${assetFileName}${quote}`;
                 console.log(`🔄 Replacing asset path: ${fullPath} → ./${assetOutputDir}/${packageName}/${assetFileName}`);
