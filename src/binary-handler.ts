@@ -1,5 +1,5 @@
-import { existsSync, copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
-import { join, dirname, relative, resolve } from 'path';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
+import { dirname, join, relative } from 'path';
 import type { BackbundleConfig } from './types.js';
 
 /**
@@ -14,30 +14,30 @@ const KNOWN_BINARY_PACKAGES = [
   'pg',
   'mysql',
   'mysql2',
-  
+
   // Image processing
   'sharp',
   'canvas',
   'node-canvas',
-  
+
   // Compression
   'node-zstd',
   'snappy',
-  
+
   // Native modules
   'bcrypt',
   'argon2',
   'node-gyp',
-  
+
   // Serialization
   'msgpack',
   'protobufjs',
-  
+
   // System integration
   'node-pty',
   'node-ssh',
   'node-ffi',
-  
+
   // Performance
   'cpu-features',
   're2',
@@ -51,7 +51,7 @@ export function isBinaryPackage(packageName: string, packagePath: string): boole
   if (KNOWN_BINARY_PACKAGES.includes(packageName)) {
     return true;
   }
-  
+
   // Check for common binary file patterns
   const patterns = [
     /\.node$/,
@@ -63,7 +63,7 @@ export function isBinaryPackage(packageName: string, packagePath: string): boole
     /prebuilds?\//,
     /build\/Release\//,
   ];
-  
+
   try {
     const files = getAllFiles(packagePath);
     return files.some(file => patterns.some(pattern => pattern.test(file)));
@@ -79,16 +79,16 @@ function getAllFiles(dir: string, maxDepth: number = 3, currentDepth: number = 0
   if (!existsSync(dir) || currentDepth > maxDepth) {
     return [];
   }
-  
+
   const files: string[] = [];
-  
+
   try {
     const items = readdirSync(dir);
-    
+
     for (const item of items) {
       const fullPath = join(dir, item);
       const stat = statSync(fullPath);
-      
+
       if (stat.isFile()) {
         files.push(relative(dir, fullPath));
       } else if (stat.isDirectory() && currentDepth < maxDepth) {
@@ -99,7 +99,7 @@ function getAllFiles(dir: string, maxDepth: number = 3, currentDepth: number = 0
   } catch {
     // Ignore errors
   }
-  
+
   return files;
 }
 
@@ -113,7 +113,7 @@ export function copyBinaryFiles(
   preserveStructure: boolean = true
 ): string[] {
   const copiedFiles: string[] = [];
-  
+
   // Patterns for binary files we want to copy
   const binaryPatterns = [
     /\.node$/,
@@ -124,35 +124,35 @@ export function copyBinaryFiles(
     /prebuilds?\//,
     /build\/Release\//,
   ];
-  
+
   try {
     const files = getAllFiles(packagePath);
-    
+
     for (const file of files) {
       if (binaryPatterns.some(pattern => pattern.test(file))) {
         const sourcePath = join(packagePath, file);
-        
+
         let targetPath: string;
         if (preserveStructure) {
           targetPath = join(outputPath, 'node_modules', packageName, file);
         } else {
           targetPath = join(outputPath, 'binaries', packageName, file);
         }
-        
+
         // Ensure target directory exists
         mkdirSync(dirname(targetPath), { recursive: true });
-        
+
         // Copy the file
         copyFileSync(sourcePath, targetPath);
         copiedFiles.push(targetPath);
-        
+
         console.log(`📦 Copied binary: ${packageName}/${file}`);
       }
     }
   } catch (error) {
     console.warn(`⚠️  Failed to copy binaries for ${packageName}:`, error);
   }
-  
+
   return copiedFiles;
 }
 
@@ -171,20 +171,20 @@ export function handleBinaryPackages(
   const strategy = binaryConfig.strategy || 'external';
   const explicitPackages = binaryConfig.packages || [];
   const preserveStructure = binaryConfig.preserveStructure !== false;
-  
+
   const external: string[] = [];
   const copiedFiles: string[] = [];
-  
+
   // Get all packages to check
   const packagesToCheck = new Set(explicitPackages);
-  
+
   // Auto-detect binary packages if not explicitly specified
   if (explicitPackages.length === 0) {
     try {
       const packages = readdirSync(nodeModulesPath);
       for (const pkg of packages) {
         if (pkg.startsWith('.')) continue;
-        
+
         const packagePath = join(nodeModulesPath, pkg);
         if (statSync(packagePath).isDirectory() && isBinaryPackage(pkg, packagePath)) {
           packagesToCheck.add(pkg);
@@ -194,16 +194,16 @@ export function handleBinaryPackages(
       // Ignore errors when reading node_modules
     }
   }
-  
+
   // Process each binary package
   for (const packageName of packagesToCheck) {
     const packagePath = join(nodeModulesPath, packageName);
-    
+
     if (!existsSync(packagePath)) {
       console.warn(`⚠️  Binary package not found: ${packageName}`);
       continue;
     }
-    
+
     switch (strategy) {
       case 'copy':
         const copied = copyBinaryFiles(
@@ -215,18 +215,18 @@ export function handleBinaryPackages(
         copiedFiles.push(...copied);
         external.push(packageName);
         break;
-        
+
       case 'external':
         external.push(packageName);
         console.log(`🔗 Marked as external: ${packageName}`);
         break;
-        
+
       case 'ignore':
         console.log(`🚫 Ignoring binary package: ${packageName}`);
         break;
     }
   }
-  
+
   return { external, copiedFiles };
 }
 
@@ -240,7 +240,7 @@ export function generateBinaryInstructions(
   if (copiedFiles.length === 0) {
     return '';
   }
-  
+
   const instructions = [
     '# Binary Packages Handling',
     '',
@@ -256,6 +256,6 @@ export function generateBinaryInstructions(
     '3. Consider using Docker for consistent deployment environments',
     ''
   ];
-  
+
   return instructions.join('\n');
 }

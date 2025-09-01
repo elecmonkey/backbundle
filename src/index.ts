@@ -4,8 +4,8 @@
  * Main entry point for the library API
  */
 
-export { Bundler, bundle, detectEntryPoint, detectFramework } from './bundler.js';
-export { NODE_BUILTINS, FRAMEWORK_PRESETS, getPreset, listPresets } from './presets.js';
+export { bundle, Bundler, detectEntryPoint, detectFramework } from './bundler.js';
+export { FRAMEWORK_PRESETS, getPreset, listPresets, NODE_BUILTINS } from './presets.js';
 export type { BackbundleConfig, BundleResult, FrameworkPreset } from './types.js';
 
 /**

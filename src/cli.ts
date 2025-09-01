@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
 import chalk from 'chalk';
-import ora from 'ora';
-import { resolve, dirname, basename, extname } from 'path';
+import { Command } from 'commander';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
+import ora from 'ora';
+import { basename, dirname, extname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { bundle, detectEntryPoint, detectFramework } from './bundler.js';
-import { getPreset, listPresets } from './presets.js';
 import { loadConfig, mergeConfig } from './config.js';
+import { getPreset, listPresets } from './presets.js';
 import type { BackbundleConfig } from './types.js';
 
 const __filename = fileURLToPath(import.meta.url);

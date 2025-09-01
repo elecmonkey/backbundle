@@ -45,3 +45,4 @@ export function getAllPlugins(config: BackbundleConfig): Plugin[] {
 export { createAssetPathReplacerPlugin } from './asset-path-replacer.js';
 export { createEsmCompatibilityPlugin } from './esm-compatibility.js';
 export { createNodeBuiltinsPlugin } from './node-builtins.js';
+

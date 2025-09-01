@@ -1,11 +1,11 @@
 import { build, type BuildOptions } from 'esbuild';
-import { readFileSync, statSync, existsSync } from 'fs';
-import { resolve, dirname, join } from 'path';
-import type { BackbundleConfig, BundleResult } from './types.js';
-import { NODE_BUILTINS } from './presets.js';
-import { handleBinaryPackages, generateBinaryInstructions } from './binary-handler.js';
+import { existsSync, readFileSync, statSync } from 'fs';
+import { dirname, join, resolve } from 'path';
 import { AssetHandler } from './asset-handler.js';
+import { generateBinaryInstructions, handleBinaryPackages } from './binary-handler.js';
 import { getAllPlugins } from './plugins.js';
+import { NODE_BUILTINS } from './presets.js';
+import type { BackbundleConfig, BundleResult } from './types.js';
 
 /**
  * Main bundler class for Backbundle
@@ -75,7 +75,7 @@ export class Bundler {
         }
       }),
       // Apply merged configuration, but exclude plugins to avoid duplication
-      ...{ ...config.esbuildOptions, plugins: undefined },
+      ...config.esbuildOptions,
       // Add all plugins
       plugins: allPlugins,
     };

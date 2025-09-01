@@ -1,6 +1,6 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
-import { join, dirname, extname, relative } from 'path';
+import { copyFileSync, existsSync, mkdirSync } from 'fs';
 import { glob } from 'glob';
+import { dirname, join, relative } from 'path';
 import type { BackbundleConfig } from './types.js';
 
 /**
@@ -49,7 +49,7 @@ export class AssetHandler {
             for (const wasmFile of wasmFiles) {
                 const parts = wasmFile.split('/');
                 let packageName: string;
-                
+
                 // Handle PNPM structure: .pnpm/package@version/node_modules/package/file.wasm
                 if (parts[0] === '.pnpm' && parts.length >= 4) {
                     const pnpmPackageDir = parts[1]; // e.g., "json-packer-wasm@0.1.1"
@@ -63,7 +63,7 @@ export class AssetHandler {
                     // Handle standard npm structure: package/file.wasm
                     packageName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
                 }
-                
+
                 if (!wasmPackages.includes(packageName)) {
                     wasmPackages.push(packageName);
                 }
@@ -114,23 +114,23 @@ export class AssetHandler {
         try {
             // First try standard npm structure
             let actualPackagePath = packagePath;
-            
+
             if (!existsSync(packagePath)) {
                 // Try PNPM structure
                 const nodeModulesPath = join(process.cwd(), 'node_modules');
                 const pnpmPath = join(nodeModulesPath, '.pnpm');
-                
+
                 if (existsSync(pnpmPath)) {
                     // Find the package in .pnpm directory - handle scoped packages
-                    const searchPattern = packageName.includes('/') 
+                    const searchPattern = packageName.includes('/')
                         ? `*${packageName.replace('/', '*')}*/node_modules/${packageName}`
                         : `${packageName}@*/node_modules/${packageName}`;
-                    
-                    const pnpmDirs = glob.sync(searchPattern, { 
+
+                    const pnpmDirs = glob.sync(searchPattern, {
                         cwd: pnpmPath,
-                        dot: true 
+                        dot: true
                     });
-                    
+
                     if (pnpmDirs.length > 0) {
                         actualPackagePath = join(pnpmPath, pnpmDirs[0]);
                     }

@@ -42,7 +42,7 @@ export async function loadConfig(configPath?: string, baseDir: string = process.
 
   try {
     console.log(`📄 Loading config from: ${configFile}`);
-    
+
     if (configFile.endsWith('.json')) {
       // Handle JSON config files
       const { readFileSync } = await import('fs');
