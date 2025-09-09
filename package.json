@@ -1,6 +1,6 @@
 {
   "name": "backbundle",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Zero-configuration bundler for Node.js backend applications based on esbuild.",
   "main": "dist/index.js",
   "bin": {
